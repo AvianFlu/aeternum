@@ -15,7 +15,6 @@ int main(int argc, char *argv[]) {
   assert(argc > 1);
   char **child_args = &argv[1];
   int i;
-  printf("Daemonizing %s...\n", argv[1]);
 
   // Fork the process.
   int pid = fork();
