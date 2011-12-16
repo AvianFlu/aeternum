@@ -15,22 +15,24 @@ int main(int argc, char *argv[]) {
   assert(argc > 1);
   char **child_args = &argv[1];
   int i;
-  printf("Aeternum started, daemonizing %s...\n", argv[2]);
+  printf("Daemonizing %s...\n", argv[1]);
 
   // Fork the process.
   int pid = fork();
-  if (pid == 0) {
-    // `fork(2)` returns 0 to the child process...
-    printf("Fork successful...\n");
-  }
-  else if (pid < 0) {
-    // < 0 in case of failure
+  
+  // fork() makes a clone of the current process - the same code will thus get
+  // executed in both the parent and the child.  We must check for this.
+  // fork() returns 0 in the child process, the child's pid in the parent
+  // process, and -1 if an error occurs while forking.
+  
+  if (pid < 0) {
+    // An error has occurred
     printf("An error has occurred while forking - errno %d.  Exiting.\n", errno);
     exit(pid);
   }
-  else {
-    // And PID of the child process to the parent
-    printf("Aeternum parent exiting (child was spawned as %d)\n", pid);
+  else if (pid > 0) {
+    // This is the parent process
+    printf("Child has been spawned and daemonized. PID: %d\n", pid);
     // We want to daemonize, so the parent needs to exit at this point.
     exit(0);
   }
@@ -56,10 +58,8 @@ int main(int argc, char *argv[]) {
   run_target(argv[1], child_args);
 }
 
-void run_target(const char *filename, char *args[])
-{
+void run_target(const char *filename, char *args[]) {
   int result;
   result = execvp(filename, args);
   assert(result != -1);
-  fprintf(stdout, "execvp() successful.");
 }
