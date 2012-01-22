@@ -31,7 +31,7 @@ struct Options *Options_parse(int argc, char *argv[]) {
             break;
           case '-':
             if (argv[i + 1] != NULL) {
-              opts->target = &argv[i + 1][0];
+              opts->target = strdup(argv[i + 1]);
               opts->child_args = &argv[i + 1];
             }
             break;
