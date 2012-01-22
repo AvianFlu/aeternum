@@ -1,12 +1,12 @@
-## Aeternum
+## aeternum
 
 `aeternum` is a very small program that should daemonize any process on a Linux
 system.  
 
 ### Installation
 
-     git clone git@github.com:AvianFlu/Aeternum.git
-     cd Aeternum
+     git clone git@github.com:AvianFlu/aeternum.git
+     cd aeternum
      make
      sudo make install
 
