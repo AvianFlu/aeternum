@@ -24,4 +24,4 @@ install:
 	cp aeternum /usr/local/bin/aeternum
 
 uninstall:
-	rm -rf /usr/local/bin/aeternum
+	rm -f /usr/local/bin/aeternum
