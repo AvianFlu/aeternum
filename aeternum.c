@@ -17,9 +17,8 @@ struct Options *aeternum_options(int argc, char *argv[]) {
 
 void aeternum_start(Options *opts) {
   assert(opts != NULL);
-  assert(opts->outfile != NULL);
-  assert(opts->errfile != NULL);
-  assert(opts->child_args);
+  assert(opts->target != NULL);
+  assert(opts->child_args != NULL);
   aeternum_fork();
   aeternum_redirect(opts->outfile, STDOUT_FILENO);
   aeternum_redirect(opts->errfile, STDERR_FILENO);
@@ -48,8 +47,10 @@ void aeternum_fork() {
 }
 
 void aeternum_redirect(const char *dest, int fileno) {
-  int out = open(dest,
-                  O_WRONLY | O_APPEND | O_CREAT,
+  if (dest == NULL) {
+    dest = "/dev/null\0";
+  }
+  int out = open(dest, O_WRONLY | O_APPEND | O_CREAT,
                   S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
   if (out == -1) printf("An error occurred: %s", strerror(errno));
   assert(out != -1);
