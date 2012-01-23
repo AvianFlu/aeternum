@@ -5,7 +5,7 @@ system.
 
 ### Installation
 
-     git clone git@github.com:AvianFlu/aeternum.git
+     git clone https://github.com/AvianFlu/aeternum.git
      cd aeternum
      make
      sudo make install
