@@ -33,6 +33,7 @@ struct Options *Options_parse(int argc, char *argv[]) {
             if (argv[i + 1] != NULL) {
               opts->target = strdup(argv[i + 1]);
               opts->child_args = &argv[i + 1];
+              return opts;
             }
             break;
           default:
