@@ -12,6 +12,7 @@ struct Options *Options_parse(int argc, char *argv[]) {
   opts->outfile = NULL;
   opts->errfile = NULL;
   opts->target = NULL;
+  opts->json = 0;
   opts->child_args = NULL;
 
   int i;
@@ -28,6 +29,9 @@ struct Options *Options_parse(int argc, char *argv[]) {
             if (argv[i + 1][0] != '-') {
               opts->errfile = strdup(argv[i + 1]);
             }
+            break;
+          case 'j':
+            opts->json = 1;
             break;
           case '-':
             if (argv[i + 1] != NULL) {

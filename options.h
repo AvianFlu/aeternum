@@ -5,6 +5,7 @@ struct Options {
   char *outfile;
   char *errfile;
   char *target;
+  int json;
   char **child_args;
 };
 
