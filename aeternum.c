@@ -10,6 +10,8 @@
 #include <assert.h>
 #include "aeternum.h"
 
+static int json;
+
 struct Options *aeternum_options(int argc, char *argv[]) {
   Options *opts = Options_parse(argc, argv);
   return opts;
@@ -19,6 +21,7 @@ void aeternum_start(Options *opts) {
   assert(opts != NULL);
   assert(opts->target != NULL);
   assert(opts->child_args != NULL);
+  if (opts->json) json = 1;
   aeternum_fork();
   aeternum_redirect(opts->outfile, STDOUT_FILENO);
   aeternum_redirect(opts->errfile, STDERR_FILENO);
@@ -33,12 +36,21 @@ void aeternum_fork() {
   signal(SIGHUP, SIG_IGN);
 
   if (pid < 0) {
-    printf("An error occurred: %s", strerror(errno));
-    // Should we find a graceful way to bail here?
+    if (json) {
+      printf("{\"error\": \"%s\"}", strerror(errno));
+    }
+    else {
+      printf("An error occurred: %s", strerror(errno));
+    }
     exit(pid);
   }
   else if (pid > 0) {
-    printf("Child has been spawned and daemonized. PID: %d\n", pid);
+    if (json) {
+      printf("{\"pid\": %d}", pid);
+    }
+    else {
+      printf("Child has been spawned and daemonized. PID: %d\n", pid);
+    }
     exit(0);
   }
 
