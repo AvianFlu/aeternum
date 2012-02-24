@@ -29,11 +29,10 @@ void aeternum_start(Options *opts) {
 }
 
 void aeternum_fork() {
-
-  int pid = fork();
-
   signal(SIGCHLD, SIG_IGN);
   signal(SIGHUP, SIG_IGN);
+
+  int pid = fork();
 
   if (pid < 0) {
     if (json) {
@@ -54,24 +53,34 @@ void aeternum_fork() {
     exit(0);
   }
 
-  setsid();
+  if (setsid() == -1) {
+    perror("setsid()");
+    exit(errno);
+  }
   umask(027);
 }
 
 void aeternum_redirect(const char *dest, int fileno) {
+  int out;
+
   if (dest == NULL) {
     dest = "/dev/null\0";
   }
-  int out = open(dest, O_WRONLY | O_APPEND | O_CREAT,
+  out = open(dest, O_WRONLY | O_APPEND | O_CREAT,
                   S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
-  if (out == -1) printf("An error occurred: %s", strerror(errno));
-  assert(out != -1);
-  int dup_res = dup2(out, fileno);
-  if (dup_res == -1) printf("An error occurred: %s", strerror(errno));
-  assert(dup_res != -1);
+  if (out == -1) {
+    perror("open()");
+    exit(errno);
+  }
+  if (dup2(out, fileno) == -1) {
+    perror("dup2()");
+    exit(errno);
+  }
 }
 
 void aeternum_exec(const char *filename, char *args[]) {
-  int result = execvp(filename, args);
-  assert(result != -1);
+  if (execvp(filename, args) != 0) {
+    perror("execvp()");
+    exit(errno);
+  }
 }
