@@ -3,9 +3,9 @@
 
 #include "options.h"
 
-struct Options *aeternum_options(int argc, char *argv[]);
+options_t aeternum_options(int argc, char *argv[]);
 
-void aeternum_start(Options *opts);
+void aeternum_start(options_t opts);
 
 void aeternum_fork();
 

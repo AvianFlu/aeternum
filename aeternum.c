@@ -12,20 +12,20 @@
 
 static int json;
 
-struct Options *aeternum_options(int argc, char *argv[]) {
-  Options *opts = Options_parse(argc, argv);
+options_t aeternum_options(int argc, char *argv[]) {
+  options_t opts = options_parse(argc, argv);
   return opts;
 }
 
-void aeternum_start(Options *opts) {
-  assert(opts != NULL);
-  assert(opts->target != NULL);
-  assert(opts->child_args != NULL);
-  if (opts->json) json = 1;
+void aeternum_start(options_t opts) {
+  assert(opts.target != NULL);
+  assert(opts.child_args != NULL);
+
+  if (opts.json) json = 1;
   aeternum_fork();
-  aeternum_redirect(opts->outfile, STDOUT_FILENO);
-  aeternum_redirect(opts->errfile, STDERR_FILENO);
-  aeternum_exec(opts->target, opts->child_args);
+  aeternum_redirect(opts.outfile, STDOUT_FILENO);
+  aeternum_redirect(opts.errfile, STDERR_FILENO);
+  aeternum_exec(opts.target, opts.child_args);
 }
 
 void aeternum_fork() {
