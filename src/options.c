@@ -4,17 +4,19 @@
 #include "options.h"
 
 options_t options_parse(int argc, char *argv[]) {
-  assert(argc > 1);
-
   options_t opts;
+  int i;
+
+  assert(argc > 1);
 
   opts.outfile = NULL;
   opts.errfile = NULL;
-  opts.target = NULL;
   opts.json = 0;
+  opts.num_args = 0;
   opts.child_args = NULL;
+  opts.target = NULL;
+  opts.command = NULL;
 
-  int i;
   for (i = 1; i < argc; i++) {
     switch((int)argv[i][0]) {
       case '-':
@@ -36,6 +38,7 @@ options_t options_parse(int argc, char *argv[]) {
             if (argv[i + 1] != NULL) {
               opts.target = &argv[i + 1][0];
               opts.child_args = &argv[i + 1];
+              opts.num_args = argc-i-1;
               return opts;
             }
             break;
@@ -49,4 +52,3 @@ options_t options_parse(int argc, char *argv[]) {
   }
   return opts;
 }
-

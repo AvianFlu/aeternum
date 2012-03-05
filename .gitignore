@@ -1,0 +1,6 @@
+#Visual Studios stuff
+ipch/
+Debug/
+Release/
+*.sdf
+*.suo

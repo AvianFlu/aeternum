@@ -6,5 +6,3 @@ int main(int argc, char *argv[]) {
   aeternum_start(opts);
   return 0;
 }
-
-

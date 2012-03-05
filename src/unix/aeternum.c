@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <assert.h>
 #include "aeternum.h"
+#include "aeternum_unix.h"
 
 static int json;
 
