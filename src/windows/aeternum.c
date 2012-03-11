@@ -93,12 +93,12 @@ char* aeternum_make_command(char** args, int num_args) {
 
   i = 0;
   //copy first argument including \0
-  strncpy(command, args[i], strlen(args[i])+1);
+  strncpy_s(command, size*sizeof(char), args[i], strlen(args[i])+1);
 
   for (++i; i < num_args; ++i) {
     //concatenate each argument plus space
-    strncat(command, " ", 1);
-    strncat(command, args[i], strlen(args[i]));
+    strncat_s(command, size*sizeof(char), " ", 1);
+    strncat_s(command, size*sizeof(char), args[i], strlen(args[i]));
   }
 
   //terminate with null character (overwrites space)
@@ -108,11 +108,10 @@ char* aeternum_make_command(char** args, int num_args) {
 }
 
 options_t aeternum_options(int argc, char *argv[]) {
-  options_t opts = options_parse(argc, argv);
+  options_t opts;
+  opts = options_parse(argc, argv);
 
   opts.command = aeternum_make_command(opts.child_args, opts.num_args);
-
-  printf(opts.command);
 
   return opts;
 }
@@ -216,8 +215,8 @@ int aeternum_exec(char* command, char* out_file, char* err_file) {
                      wcommand,
                      NULL,
                      NULL,
-                     1,
-                     CREATE_UNICODE_ENVIRONMENT | CREATE_NEW_PROCESS_GROUP | DETACHED_PROCESS,
+                     TRUE,
+                     CREATE_NEW_PROCESS_GROUP | CREATE_NO_WINDOW | DETACHED_PROCESS,
                      NULL,
                      NULL,
                      &startup,
