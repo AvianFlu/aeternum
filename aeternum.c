@@ -10,7 +10,8 @@
 #include <assert.h>
 #include "aeternum.h"
 
-static int json;
+static int json = 0;
+static int silent = 1;
 
 options_t aeternum_options(int argc, char *argv[]) {
   options_t opts = options_parse(argc, argv);
@@ -22,60 +23,93 @@ void aeternum_start(options_t opts) {
   assert(opts.child_args != NULL);
 
   if (opts.json) json = 1;
-  aeternum_fork();
-  aeternum_redirect(opts.outfile, STDOUT_FILENO);
-  aeternum_redirect(opts.errfile, STDERR_FILENO);
+  if (!opts.silent) silent = 0;
+
+  if (aeternum_fork() < 0) {
+    fprintf(stderr, "fork(), %s", strerror(errno));
+    exit(1);
+  }
+
+  if (aeternum_dup(-1, STDIN_FILENO) < 0) {
+    fprintf(stderr, "stdin redirect, %s", strerror(errno));
+    exit(1);
+  }
+  if (aeternum_redirect(opts.outfile, STDOUT_FILENO) < 0) {
+    fprintf(stderr, "stdout redirect, %s", strerror(errno));
+    exit(1);
+  }
+  if (aeternum_redirect(opts.errfile, STDERR_FILENO) < 0) {
+    fprintf(stderr, "stderr redirect, %s", strerror(errno));
+    exit(1);
+  }
   aeternum_exec(opts.target, opts.child_args);
 }
 
-void aeternum_fork() {
+int aeternum_fork() {
+  int pid = -1;
   signal(SIGCHLD, SIG_IGN);
   signal(SIGHUP, SIG_IGN);
 
-  int pid = fork();
+  pid = fork();
 
   if (pid < 0) {
     if (json) {
-      printf("{\"error\": \"%s\"}", strerror(errno));
+      fprintf(stderr, "{\"error\": \"%s\"}", strerror(errno));
     }
     else {
-      printf("An error occurred: %s", strerror(errno));
+      fprintf(stderr, "An error occurred: %s", strerror(errno));
     }
-    exit(pid);
+    return pid;
   }
   else if (pid > 0) {
-    if (json) {
+    if (json && !silent) {
       printf("{\"pid\": %d}", pid);
     }
-    else {
+    else if (!silent) {
       printf("Child has been spawned and daemonized. PID: %d\n", pid);
     }
     exit(0);
   }
 
   if (setsid() == -1) {
-    perror("setsid()");
-    exit(errno);
+    return -1;
   }
   umask(027);
+  return 0;
 }
 
-void aeternum_redirect(const char *dest, int fileno) {
+int aeternum_redirect(const char *dest, int fileno) {
   int out;
+  const char *filename;
 
   if (dest == NULL) {
-    dest = "/dev/null\0";
+    filename = "/dev/null";
   }
-  out = open(dest, O_WRONLY | O_APPEND | O_CREAT,
+  else {
+    filename = dest;
+  }
+  out = open(filename, O_WRONLY | O_APPEND | O_CREAT,
                   S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
   if (out == -1) {
-    perror("open()");
-    exit(errno);
+    return -1;
   }
   if (dup2(out, fileno) == -1) {
-    perror("dup2()");
-    exit(errno);
+    return -1;
   }
+  return 0;
+}
+
+int aeternum_dup(int oldfd, int newfd) {
+  if (oldfd == -1) {
+    oldfd = open("/dev/null", newfd  == 0 ? O_RDONLY : O_WRONLY);
+  }
+  if (close(newfd) == -1) {
+    return -1;
+  }
+  if (dup2(oldfd, newfd) == -1) {
+    return -1;
+  }
+  return 0;
 }
 
 void aeternum_exec(const char *filename, char *args[]) {
@@ -84,3 +118,4 @@ void aeternum_exec(const char *filename, char *args[]) {
     exit(errno);
   }
 }
+
