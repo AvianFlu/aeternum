@@ -12,6 +12,7 @@ options_t options_parse(int argc, char *argv[]) {
   opts.errfile = NULL;
   opts.target = NULL;
   opts.json = 0;
+  opts.silent = 0;
   opts.child_args = NULL;
 
   int i;
@@ -31,6 +32,9 @@ options_t options_parse(int argc, char *argv[]) {
             break;
           case 'j':
             opts.json = 1;
+            break;
+          case 's':
+            opts.silent = 1;
             break;
           case '-':
             if (argv[i + 1] != NULL) {
